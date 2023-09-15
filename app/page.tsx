@@ -38,7 +38,7 @@ export default async function Home({searchParams: {category, endcursor}}: Props)
       <section className="flexStart flex-col paddings">
         <Categories />
 
-        <p className='no-result-text text-center'>Projects not found.</p>
+        <p className='no-result-text text-center'>Projects not found 😢. Please add some!!</p>
       </section>
     )
   }
