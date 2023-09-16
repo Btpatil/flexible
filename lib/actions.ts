@@ -1,13 +1,19 @@
 import { ProjectForm } from "@/common.types";
 import { createProjectMutation, createUserQuery, deleteProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsByCateforyAndEndcursorQuery, projectsByCategoryQuery, projectsByEndcursorQuery, projectsQuery, updateProjectMutation } from "@/graphql";
 import { GraphQLClient } from "graphql-request";
-import { json } from "node:stream/consumers";
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-const apiurl = isProduction ? process.env.NEXT_GRAFBASE_API_ENDPOINT || '' : 'http://127.0.0.1:4000/graphql'
+// const apiurl = isProduction ? process.env.NEXT_GRAFBASE_API_ENDPOINT || '' : 'http://127.0.0.1:4000/graphql'
 
-const apikey = isProduction ? process.env.NEXT_API_KEY || '' : '1234'
+const apiurl = 'https://flexible-main-btpatil.grafbase.app/graphql'
+
+// const apikey = isProduction ? process.env.NEXT_API_KEY || '' : '1234'
+const getApiKey = () => {
+    const apikey = process.env.NEXT_API_KEY
+    return apikey
+}
+const apikey = getApiKey()!
 
 const serverurl = isProduction ? process.env.NEXT_PUBLIC_SERVER_URL : 'http://localhost:3000'
 
@@ -16,7 +22,7 @@ const client = new GraphQLClient(apiurl)
 const makeGraphQlRequest = async (query: string, variables = {}) => {
     try {
         return await client.request(query, variables)
-    } catch (error) {
+    } catch (error: any) {
         throw error
     }
 }
