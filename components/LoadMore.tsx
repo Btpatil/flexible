@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import { useSearchParams } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
 import Button from './Button'
 
 type Props = {
@@ -11,22 +12,48 @@ type Props = {
 }
 const LoadMore = ({ startCursor, endCursor, hasNextPage, hasPrevPage }: Props) => {
     const router = useRouter()
+    const params = useSearchParams()
+    const [number, setnumber] = useState(() => 2)
+    useEffect(() => {
+        if (!params.get('nextPage') && number !== 2) {
+            setnumber(prev => 2);
+        }
+        // else {
+        //     console.log(params.get('nextPage'), number, parseInt(params.get('nextPage')!) == number)
+        // }
+    }, [params.get('nextPage')])
+
+    const changePageNumber = () => {
+        setnumber((prev) => {
+            console.log(params.get('nextPage'), count)
+            prev = count
+            return prev
+        })
+        const count = parseInt(params.get('nextPage')!) + 1
+        return count
+    }
 
     const handleNavigation = (type: string) => {
         const currentParams = new URLSearchParams(window.location.search);
-        
+
         if (type === "prev" && hasPrevPage) {
             currentParams.delete("endcursor");
             currentParams.set("startcursor", startCursor);
         } else if (type === "next" && hasNextPage) {
-            currentParams.delete("startcursor");
-            currentParams.set("endcursor", endCursor);
+            if (params.get('nextPage')) {
+                const num = changePageNumber()
+                currentParams.delete("nextPage");
+                currentParams.set("nextPage", num.toString());
+            } else {
+                currentParams.delete("nextPage");
+                currentParams.set("nextPage", number.toString());
+            }
         }
-    
+
         const newSearchParams = currentParams.toString();
         const newPathname = `${window.location.pathname}?${newSearchParams}`;
-    
-        router.push(newPathname);
+
+        router.push(newPathname, { scroll: false });
     };
 
     return (
@@ -34,7 +61,7 @@ const LoadMore = ({ startCursor, endCursor, hasNextPage, hasPrevPage }: Props) =
             {hasPrevPage &&
                 <Button title='Prev Page' handleClick={() => handleNavigation('first')} />}
             {hasNextPage &&
-                <Button title='Next' handleClick={() => handleNavigation('next')} />}
+                <Button title='Load More' handleClick={() => handleNavigation('next')} />}
         </div>
     )
 }

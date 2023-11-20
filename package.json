@@ -17,7 +17,7 @@
     "autoprefixer": "10.4.14",
     "cloudinary": "^1.37.3",
     "graphql-request": "^6.1.0",
-    "jsonwebtoken": "^9.0.1",
+    "jsonwebtoken": "^9.0.2",
     "next": "13.4.9",
     "next-auth": "^4.22.1",
     "postcss": "8.4.25",

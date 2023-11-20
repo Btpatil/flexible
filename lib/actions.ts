@@ -23,7 +23,7 @@ const makeGraphQlRequest = async (query: string, variables = {}) => {
     try {
         return await client.request(query, variables)
     } catch (error: any) {
-        throw error
+        console.log(error)
     }
 }
 
@@ -82,12 +82,25 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
     }
 }
 
-export const fetchAllProjects = (category?: string, endcursor?: string) => {
+export const fetchAllProjectsByCategory = async (category?: string, numberOfProects?: string) => {
+    let n = numberOfProects == undefined ? 1 : parseInt(numberOfProects!)*1
+
+    client.setHeader("x-api-key", apikey)
+    if(category) return makeGraphQlRequest(projectsByCategoryQuery, {n, category})
+};
+
+export const fetchAllProjects = async (endcursor?: string, numberOfProects?: string) => {
+    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
+
     client.setHeader("x-api-key", apikey);
-    if(!category && !endcursor) return makeGraphQlRequest(projectsQuery);
-    if(category && !endcursor) return makeGraphQlRequest(projectsByCategoryQuery, {category})
-    if(!category && endcursor) return makeGraphQlRequest(projectsByEndcursorQuery, {endcursor})
-    if(category && endcursor) return makeGraphQlRequest(projectsByCateforyAndEndcursorQuery, {category, endcursor})
+    if(!endcursor) return makeGraphQlRequest(projectsQuery, {n});
+    // else if(category && !endcursor) return makeGraphQlRequest(projectsByCategoryQuery, {category})
+    // else if(!category && endcursor) {
+    //     const data = await makeGraphQlRequest(projectsByEndcursorQuery, {endcursor})
+    //     console.log(data)
+    //     return makeGraphQlRequest(projectsByEndcursorQuery, {endcursor})
+    // }
+    // else if(category && endcursor) return makeGraphQlRequest(projectsByCateforyAndEndcursorQuery, {category, endcursor})
 
 };
 
@@ -97,10 +110,11 @@ export const getProjectDetails = (id: string) => {
     return makeGraphQlRequest(getProjectByIdQuery, { id });
 };
 
-export const getUserProjects = (id: string, last?: number) => {
+export const getUserProjects = (id: string, numberOfProects?: string) => {
     client.setHeader("x-api-key", apikey);
+    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
 
-    return makeGraphQlRequest(getProjectsOfUserQuery, { id, last });
+    return makeGraphQlRequest(getProjectsOfUserQuery, { id, n });
 };
 
 

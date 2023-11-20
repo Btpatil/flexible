@@ -69,8 +69,8 @@ export const createProjectMutation = `
 
 
 export const projectsQuery = `
-query getProjects {
-  projectSearch(first: 8) {
+query ProjectCollection($n: Int) {
+  projectCollection(first: $n, orderBy: {createdAt:ASC}) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -99,8 +99,8 @@ query getProjects {
 `;
 
 export const projectsByCategoryQuery = `
-  query getProjects($category: String) {
-    projectSearch(first: 8, filter: {category: {eq: $category}}) {
+  query getProjects($n: Int, $category: String) {
+    projectSearch(first: $n, filter: {category: {eq: $category}}) {
       pageInfo {
         hasNextPage
         hasPreviousPage
@@ -209,7 +209,7 @@ export const getProjectByIdQuery = `
 `;
 
 export const getProjectsOfUserQuery = `
-  query getUserProjects($id: ID!, $last: Int = 4) {
+  query getUserProjects($id: ID!, $n: Int) {
     user(by: { id: $id }) {
       id
       name
@@ -218,13 +218,19 @@ export const getProjectsOfUserQuery = `
       avatarUrl
       githubUrl
       linkedinUrl
-      projects(last: $last) {
+      projects(first: $n, orderBy: {createdAt: DESC}) {
         edges {
           node {
             id
             title
             image
           }
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          startCursor
+          endCursor
         }
       }
     }

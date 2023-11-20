@@ -4,6 +4,7 @@ import Link from "next/link";
 import AuthProviders from "./AuthProviders";
 import { getCurrentUser } from "@/lib/session";
 import ProfileMenu from "./ProfileMenu";
+import Button from "./Button";
 // import { getCurrentUser } from "@/lib/session";
 
 // import AuthProviders from "./AuthProviders";
@@ -36,23 +37,11 @@ const Navbar = async () => {
             <div className='flexCenter gap-4'>
                 {session?.user ? (
                     <>
-                        {/* {session?.user?.image &&
-                            <Link href="/profile">
-                                <Image src={session.user.image}
-                                    width={40}
-                                    height={40}
-                                    alt={session.user.name}
-                                    className=" rounded-full"
-                                />
-                            </Link>
-                        } */}
                         <ProfileMenu session={session} />
-
                         <Link href="/create-project">
-                            share work
-                            {/* <Button title='Share work' /> */}
+                            {/* share work */}
+                            <Button title='Share work' />
                         </Link>
-
                     </>
                 ) : (
                     <AuthProviders />

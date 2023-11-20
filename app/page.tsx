@@ -1,10 +1,23 @@
 import { ProjectInterface } from '@/common.types'
+import Button from '@/components/Button'
 import Categories from '@/components/Categories'
 import LoadMore from '@/components/LoadMore'
 import ProjectCard from '@/components/ProjectCard'
-import { fetchAllProjects } from '@/lib/actions'
+import { fetchAllProjects, fetchAllProjectsByCategory } from '@/lib/actions'
 
-type ProjectsSearch = {
+type ProjectCollection = {
+  projectCollection: {
+    edges: { node: ProjectInterface }[]
+    pageInfo: {
+      hasPreviousPage: boolean
+      hasNextPage: boolean
+      startCursor: string
+      endCursor: string
+    }
+  }
+}
+
+type ProjectSearch = {
   projectSearch: {
     edges: { node: ProjectInterface }[]
     pageInfo: {
@@ -20,6 +33,7 @@ type Props = {
   searchParams: {
     category?: string
     endcursor?: string
+    nextPage?: string
   }
 }
 
@@ -27,11 +41,16 @@ export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 export const revalidate = 0;
 
-export default async function Home({searchParams: {category, endcursor}}: Props) {
-  const data = await fetchAllProjects(category, endcursor) as ProjectsSearch
-
-  const projectsToDisplay = data?.projectSearch?.edges || []
-  const pageInfo = data?.projectSearch?.pageInfo
+export default async function Home({searchParams: {category, endcursor, nextPage}}: Props) {
+  const data = category ? await fetchAllProjectsByCategory(category, nextPage): await fetchAllProjects(endcursor, nextPage)
+  let projectsToDisplay:any = []
+  if ((data as ProjectCollection)?.projectCollection?.edges) {
+    projectsToDisplay = (data as ProjectCollection)?.projectCollection?.edges 
+  }else if ((data as ProjectSearch)?.projectSearch?.edges) {
+    projectsToDisplay = (data as ProjectSearch)?.projectSearch.edges
+  }
+  // const uniqueSet = new Set([...projectsToDisplay, ...data?.projectCollection?.edges]);
+  const pageInfo = (data as ProjectCollection)?.projectCollection?.pageInfo || (data as ProjectSearch)?.projectSearch?.pageInfo
 
   if (projectsToDisplay.length === 0) {
     return (

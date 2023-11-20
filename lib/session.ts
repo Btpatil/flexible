@@ -1,33 +1,37 @@
-import {getServerSession} from 'next-auth/next'
-import {NextAuthOptions, User} from 'next-auth'
+import { getServerSession } from 'next-auth/next'
+import { NextAuthOptions, User } from 'next-auth'
 import { AdapterUser } from "next-auth/adapters";
 import GoogleProvider from 'next-auth/providers/google'
-import jsonwebtoken from 'jsonwebtoken'
 import { JWT } from "next-auth/jwt";
 import { SessionInterface, UserProfile } from '@/common.types';
 import { createUser, getUser } from './actions';
 
-export const authOptions:NextAuthOptions = {
-    secret:process.env.NEXTAUTH_SECRET,
-    providers:[
+var jsonwebtoken = require('jsonwebtoken');
+
+export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
+    providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         })
     ],
     jwt: {
-        encode: ({secret, token}) => {
-            const encodedYoken = jsonwebtoken.sign({
-                ...token,
-                iss: 'grafbase',
-                exp: Math.floor(Date.now()/1000) + 60*60
-            }, secret)
+        encode: ({ secret, token }) => {
+            try {
+                const encodedYoken = jsonwebtoken.sign({
+                    ...token,
+                    iss: 'grafbase',
+                    exp: Math.floor(Date.now() + 365)
+                }, secret)
 
-            return encodedYoken
+                return encodedYoken
+            } catch (error) {
+                console.log(error)
+            }
         },
-        decode:async ({secret, token}) => {
+        decode: async ({ secret, token }) => {
             const decodedToken = jsonwebtoken.verify(token!, secret) as JWT
-
             return decodedToken
         }
     },
@@ -36,42 +40,42 @@ export const authOptions:NextAuthOptions = {
         logo: '/logo.svg'
     },
     callbacks: {
-        async session({session}){
+        async session({ session }) {
             const email = session?.user?.email as string
 
             try {
-                const data = await getUser(email) as {user?: UserProfile}
+                const data = await getUser(email) as { user?: UserProfile }
                 const newSession = {
                     ...session,
-                    user:{
+                    user: {
                         ...session.user,
                         ...data.user
                     }
                 }
 
-                return  newSession
+                return newSession
             } catch (error) {
                 console.log(error)
                 return session
             }
         },
-        async signIn({user}: {user: AdapterUser | User}){
+        async signIn({ user }: { user: AdapterUser | User }) {
             try {
                 // get user
-                const userExist = await getUser(user?.email as string) as {user? : UserProfile}
+                const userExist = await getUser(user?.email as string) as { user?: UserProfile }
 
                 // create  user
                 if (!userExist.user) {
                     await createUser(
-                        user.name as string, 
-                        user.image as string, 
+                        user.name as string,
+                        user.image as string,
                         user.email as string
-                        )
+                    )
                 }
 
                 // return
                 return true
-            } catch (error:any) {
+            } catch (error: any) {
                 console.log(error.message)
                 return false
             }
@@ -80,6 +84,11 @@ export const authOptions:NextAuthOptions = {
 }
 
 export async function getCurrentUser() {
- const session = await getServerSession(authOptions) as SessionInterface
- return session
+    try {
+        const session = await getServerSession(authOptions) as SessionInterface
+
+        return session
+    } catch (error) {
+        console.log(error)
+    }
 }

@@ -1,4 +1,5 @@
 import { ProjectInterface, UserProfile } from '@/common.types'
+import LoadMore from '@/components/LoadMore'
 import Modal from '@/components/Modal'
 import ProjectCard from '@/components/ProjectCard'
 import RelatedProjects from '@/components/RelatedProjects'
@@ -7,11 +8,29 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { AiFillLinkedin, AiFillGithub } from "react-icons/ai";
 
-export default async function page() {
+type PageInfo = {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+}
+
+type Props = {
+    searchParams: {
+      category?: string
+      endcursor?: string
+      nextPage?: string
+    }
+  }
+
+export default async function page({searchParams: {category, endcursor, nextPage}}: Props) {
     const userId = 'user_01HABVVTVGQP1VKJ3061XD6DFW'
-    const result = await getUserProjects(userId) as { user?: UserProfile }
+    const result = await getUserProjects(userId, nextPage) as { user?: UserProfile }
     const filteredProjects = result?.user?.projects?.edges
         ?.filter(({ node }: { node: ProjectInterface }) => node?.id !== null)
+    // console.log(result)
+
+    const pageInfo = result?.user?.projects?.pageInfo as PageInfo
 
     return (
         <Modal>
@@ -43,6 +62,13 @@ export default async function page() {
                     ))}
                 </section>
             </section>
+
+            <LoadMore
+                startCursor={pageInfo.startCursor}
+                endCursor={pageInfo.endCursor}
+                hasNextPage={pageInfo.hasNextPage}
+                hasPrevPage={pageInfo.hasPreviousPage}
+            />
 
             <section className='flex flex-col items-center mt-20'>
                 <div className="flex flex-wrap gap-3">

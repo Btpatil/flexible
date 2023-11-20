@@ -8,9 +8,13 @@ const Categories = () => {
     const searchParams = useSearchParams()
 
     const category = searchParams.get('category')
-
+    
     const handleTags = (filter: string) => {
-        router.push(`${pathname}/?category=${filter}`)
+        if (searchParams.get('category') == `${filter}`) {
+            router.replace('/')
+        }else{
+            router.push(`${pathname}/?category=${filter}`)
+        }
     }
 
     return (
