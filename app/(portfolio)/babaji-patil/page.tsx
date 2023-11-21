@@ -37,9 +37,9 @@ export default async function page({ searchParams: { category, endcursor, nextPa
 
     return (
         <>
-                    <nav className='flexBetween navbar'>
-            <div className='flex-1 flexCenter gap-10'>
-                {/* <Link href='#'>
+            <nav className='flexBetween navbar'>
+                <div className='flex-1 flexCenter gap-10'>
+                    {/* <Link href='#'>
                     <Image
                         src='/logo.svg'
                         width={116}
@@ -47,7 +47,7 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                         alt='logo'
                     />
                 </Link> */}
-                <ul className='xl:flex hidden text-small gap-7'>
+                    <ul className='xl:flex hidden text-small gap-7'>
                         <Link href={'#intro'}>
                             Intro
                         </Link>
@@ -63,14 +63,17 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                         <Link href={'#projects'}>
                             Projects
                         </Link>
-                </ul>
-            </div>
-        </nav>
+                    </ul>
+                </div>
+            </nav>
 
             <section className="flexStart flex-col paddings mb-16">
 
-                <div className="min-h-[80vh] flex min-w-full items-center" id='intro'>
-                    <div className="h-full w-full">
+                <div className="min-h-[80vh] flex min-w-full items-center relative" id='intro'>
+                    <div className="absolute z-0 right-0 top-0 h-full">
+                        <Image className="w-fit h-full object-contain -z-10 opacity-100 max-lg:opacity-50 max-sm:opacity-10 transition-all ease-in" src={'/projects.gif'} width={400} height={600} alt='jsdjsd' />
+                    </div>
+                    <div className="h-full w-full z-10">
                         <div className=" text-base font-thin text-gray-100">HEY THERE!!</div>
                         <div className=" m-8"></div>
                         <div className="flex my-2 text-6xl font-extrabold text-black font-mono ">I AM &nbsp;<span className='text-purple-500'>BABAJI PATIL</span></div>
@@ -90,15 +93,11 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                             <button className="flexCenter gap-3 px-4 py-3 text-white bg-black/50  bg-primary-purple rounded-xl text-sm font-medium max-md:w-full disabled:bg-purple-400">See My Work</button>
                         </Link>
                     </div>
-                    {/* <div className="lg:flex-[50%] bg-pink-300 w-full h-full">
-                        <div className="flex my-2 text-5xl font-extrabold text-slate-500 ">I'm &nbsp;<span className='text-purple-500'>Babaji Patil</span></div>
-                <div className=" text-slate-600">Front End Developer | Web Developer</div>
-                    </div> */}
                 </div>
 
                 <div className=" bg-primary-purple h-1 w-[20%] blur-sm"></div>
 
-                <div className="min-h-[400px] py-12 flex min-w-full items-center" id='aboutme'>
+                <div className="min-h-[400px] py-12 flex min-w-full items-center max-md:flex-col" id='aboutme'>
                     <div className="flex-[35%] h-full w-full">
                         <div className="flex text-8xl font-extrabold text-black font-mono ">ABOUT</div>
                         <div className="flex text-8xl font-extrabold text-black font-mono ">
@@ -112,7 +111,7 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                         a role where I can grow and learn from experienced team members and
                         enhance and grow my skills as Web Developer.
                         <div className="m-6"></div>
-                        <button className="flexCenter gap-3 px-4 py-3 text-white bg-black/50  bg-primary-purple rounded-xl text-sm font-medium max-md:w-full disabled:bg-purple-400" disabled>Download My Resume</button>
+                        <Link href={'https://www.canva.com/design/DAFGYxUftcI/-SnY4L2-u2rT9hovxIFPCQ/view?utm_content=DAFGYxUftcI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink'} target='_blank' className="flexCenter gap-3 px-4 py-3 text-white bg-black/50  bg-primary-purple rounded-xl text-sm font-medium max-md:w-full disabled:bg-purple-400">View My Resume</Link>
                     </div>
                 </div>
 
