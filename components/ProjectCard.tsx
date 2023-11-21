@@ -40,7 +40,7 @@ const ProjectCard = ({ id, image, title, name, avatarUrl, userId }: Props) => {
             </Link>
 
             <div className="flexBetween w-full px-2 mt-3 font-semibold text-sm">
-                <Link href={`/profile/${userId}`}>
+                <Link href={userId == "user_01HABVVTVGQP1VKJ3061XD6DFW" ? '/babaji-patil' : `/profile/${userId}`}>
                         <div className="flexCenter gap-2">
                             <Image
                                 src={avatarUrl}
