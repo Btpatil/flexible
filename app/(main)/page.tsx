@@ -49,7 +49,14 @@ export default async function Home({searchParams: {category, endcursor, nextPage
   }else if ((data as ProjectSearch)?.projectSearch?.edges) {
     projectsToDisplay = (data as ProjectSearch)?.projectSearch.edges
   }
-  // const uniqueSet = new Set([...projectsToDisplay, ...data?.projectCollection?.edges]);
+
+  projectsToDisplay?.sort((a: { node: { updatedAt: string | number | Date } }, b: { node: { updatedAt: string | number | Date } }) => {
+    const dateA = new Date(a.node.updatedAt) as any;
+    const dateB = new Date(b.node.updatedAt) as any;
+    // return dateA - dateB; // Sort ascending
+    return dateB - dateA; // Sort descending
+});
+
   const pageInfo = (data as ProjectCollection)?.projectCollection?.pageInfo || (data as ProjectSearch)?.projectSearch?.pageInfo
 
   if (projectsToDisplay.length === 0) {

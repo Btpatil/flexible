@@ -16,6 +16,7 @@ export interface ProjectInterface {
     liveSiteUrl: string;
     githubUrl: string;
     category: string;
+    updatedAt: string;
     id: string;
     createdBy: {
       name: string;

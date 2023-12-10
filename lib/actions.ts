@@ -83,7 +83,7 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
 }
 
 export const fetchAllProjectsByCategory = async (category?: string, numberOfProects?: string) => {
-    let n = numberOfProects == undefined ? 1 : parseInt(numberOfProects!)*1
+    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
 
     client.setHeader("x-api-key", apikey)
     if(category) return makeGraphQlRequest(projectsByCategoryQuery, {n, category})

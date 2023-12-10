@@ -86,6 +86,7 @@ query ProjectCollection($n: Int) {
         id
         image
         category
+        updatedAt
         createdBy {
           id
           email
@@ -116,6 +117,7 @@ export const projectsByCategoryQuery = `
           id
           image
           category
+          updatedAt
           createdBy {
             id
             email
@@ -218,12 +220,13 @@ export const getProjectsOfUserQuery = `
       avatarUrl
       githubUrl
       linkedinUrl
-      projects(first: $n, orderBy: {createdAt: DESC}) {
+      projects(first: $n, orderBy: {createdAt: ASC}) {
         edges {
           node {
             id
             title
             image
+            updatedAt
           }
         }
         pageInfo {

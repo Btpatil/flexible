@@ -31,7 +31,14 @@ export default async function page({ searchParams: { category, endcursor, nextPa
     const result = await getUserProjects(userId, nextPage) as { user?: UserProfile }
     const filteredProjects = result?.user?.projects?.edges
         ?.filter(({ node }: { node: ProjectInterface }) => node?.id !== null)
-    // console.log(result)
+
+    filteredProjects?.sort((a, b) => {
+        const dateA = new Date(a.node.updatedAt) as any;
+        const dateB = new Date(b.node.updatedAt) as any;
+        // return dateA - dateB; // Sort ascending
+        return dateB - dateA; // Sort descending
+    });
+    // console.log(sortedData)
 
     const pageInfo = result?.user?.projects?.pageInfo as PageInfo
 
