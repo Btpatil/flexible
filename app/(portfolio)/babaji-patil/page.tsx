@@ -32,12 +32,12 @@ export default async function page({ searchParams: { category, endcursor, nextPa
     const filteredProjects = result?.user?.projects?.edges
         ?.filter(({ node }: { node: ProjectInterface }) => node?.id !== null)
 
-    filteredProjects?.sort((a, b) => {
-        const dateA = new Date(a.node.updatedAt) as any;
-        const dateB = new Date(b.node.updatedAt) as any;
-        // return dateA - dateB; // Sort ascending
-        return dateB - dateA; // Sort descending
-    });
+    // filteredProjects?.sort((a, b) => {
+    //     const dateA = new Date(a.node.updatedAt) as any;
+    //     const dateB = new Date(b.node.updatedAt) as any;
+    //     // return dateA - dateB; // Sort ascending
+    //     return dateB - dateA; // Sort descending
+    // });
     // console.log(sortedData)
 
     const pageInfo = result?.user?.projects?.pageInfo as PageInfo
@@ -134,6 +134,8 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                         <button className="px-4 py-3 text-black bg-gray-50 rounded-xl text-md font-medium">CSS</button>
 
                         <button className="px-4 py-3 text-black bg-gray-50 rounded-xl text-md font-medium">JAVASCRIPT</button>
+
+                        <button className="px-4 py-3 text-black bg-gray-50 rounded-xl text-md font-medium">TAILWIND</button>
 
                         <button className="px-4 py-3 text-black bg-gray-50 rounded-xl text-md font-medium">BOOTSTRAP</button>
 

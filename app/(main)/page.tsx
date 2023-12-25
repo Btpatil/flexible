@@ -50,12 +50,12 @@ export default async function Home({searchParams: {category, endcursor, nextPage
     projectsToDisplay = (data as ProjectSearch)?.projectSearch.edges
   }
 
-  projectsToDisplay?.sort((a: { node: { updatedAt: string | number | Date } }, b: { node: { updatedAt: string | number | Date } }) => {
-    const dateA = new Date(a.node.updatedAt) as any;
-    const dateB = new Date(b.node.updatedAt) as any;
-    // return dateA - dateB; // Sort ascending
-    return dateB - dateA; // Sort descending
-});
+//   projectsToDisplay?.sort((a: { node: { updatedAt: string | number | Date } }, b: { node: { updatedAt: string | number | Date } }) => {
+//     const dateA = new Date(a.node.updatedAt) as any;
+//     const dateB = new Date(b.node.updatedAt) as any;
+//     // return dateA - dateB; // Sort ascending
+//     return dateB - dateA; // Sort descending
+// });
 
   const pageInfo = (data as ProjectCollection)?.projectCollection?.pageInfo || (data as ProjectSearch)?.projectSearch?.pageInfo
 

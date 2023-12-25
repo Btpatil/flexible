@@ -70,7 +70,7 @@ export const createProjectMutation = `
 
 export const projectsQuery = `
 query ProjectCollection($n: Int) {
-  projectCollection(first: $n, orderBy: {createdAt:ASC}) {
+  projectCollection(first: $n, orderBy: {createdAt:DESC}) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -220,7 +220,7 @@ export const getProjectsOfUserQuery = `
       avatarUrl
       githubUrl
       linkedinUrl
-      projects(first: $n, orderBy: {createdAt: ASC}) {
+      projects(first: $n, orderBy: {createdAt: DESC}) {
         edges {
           node {
             id
