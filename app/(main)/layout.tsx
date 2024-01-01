@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar'
 import './globals.css'
 import type { Metadata } from 'next'
 import Footer from '@/components/Footer'
+import { ProgressBarProvider } from '@/components/ProgressBarProvider'
 
 export const metadata: Metadata = {
   title: 'Flexible',
@@ -15,12 +16,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body>
-        <Navbar/>
-        <main>
-        {children}
-        </main>
-        <Footer/>
+        <ProgressBarProvider>
+          <Navbar />
+          <main>
+            {children}
+          </main>
+          <Footer />
+        </ProgressBarProvider>
       </body>
     </html>
   )

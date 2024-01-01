@@ -4,6 +4,7 @@ import Categories from '@/components/Categories'
 import LoadMore from '@/components/LoadMore'
 import ProjectCard from '@/components/ProjectCard'
 import { fetchAllProjects, fetchAllProjectsByCategory } from '@/lib/actions'
+import { PiWarningDiamond } from 'react-icons/pi'
 
 type ProjectCollection = {
   projectCollection: {
@@ -62,6 +63,11 @@ export default async function Home({searchParams: {category, endcursor, nextPage
   if (projectsToDisplay.length === 0) {
     return (
       <section className="flexStart flex-col paddings">
+              <div className=" w-full h-8 bg-yellow-50/30 rounded-md flex items-center justify-center text-yellow-900 my-5">
+                <PiWarningDiamond/> &nbsp;&nbsp;
+        Note: Few of the Links Does not work! They Might work in Future
+      </div>
+
         <Categories />
 
         <p className='no-result-text text-center'>Projects not found 😢. Please add some!!</p>
@@ -71,6 +77,12 @@ export default async function Home({searchParams: {category, endcursor, nextPage
 
   return (
     <section className="flexStart flex-col paddings mb-16">
+      
+      <div className=" w-full h-8 bg-yellow-50/30 rounded-md flex items-center justify-center text-yellow-900 my-5">
+      <PiWarningDiamond/> &nbsp;&nbsp;
+        Note: Few of the Links Does not work! They Might work in Future
+      </div>
+
       <Categories />
 
       <section className="projects-grid">

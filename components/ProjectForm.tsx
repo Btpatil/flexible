@@ -8,6 +8,7 @@ import CustomMenu from "./CustomMenu"
 import Button from "./Button"
 import { createNewProject, fetchToken, updateProject } from "@/lib/actions"
 import { useRouter } from "next/navigation"
+import { FormRichTextDescription } from "./FormRichTextDescription"
 
 type Props = {
     type: string,
@@ -111,12 +112,12 @@ const ProjectForm = ({ type, session, project }: Props) => {
                 placeholder='flexible'
             />
 
-            <FormField
-                title='description'
-                state={form.description}
-                isTextArea={true}
-                setState={(value) => handleStateChange('description', value)}
-                placeholder='Showcase and Discover your Projects'
+            <FormRichTextDescription 
+                            title='description'
+                            state={form.description}
+                            // isTextArea={true}
+                            setState={(value) => handleStateChange('description', value)}
+                            placeholder='Showcase and Discover your Projects'
             />
 
             <FormField

@@ -7,6 +7,7 @@ import Modal from "@/components/Modal"
 import { ProjectInterface } from "@/common.types"
 import RelatedProjects from "@/components/RelatedProjects"
 import ProjectActions from "@/components/ProjectActions"
+import { ReactNode } from "react"
 
 const Project = async ({ params: { id } }: { params: { id: string } }) => {
     const session = await getCurrentUser()
@@ -68,9 +69,8 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
             </section>
 
             <section className="flexCenter flex-col mt-20">
-                <p className="max-w-5xl text-xl font-normal">
-                    {projectDetails?.description}
-                </p>
+                <div className="max-w-5xl text-xl font-normal" dangerouslySetInnerHTML={{__html: projectDetails?.description}}>
+                </div>
 
                 <div className="flex flex-wrap mt-5 gap-5">
                     <Link href={projectDetails?.githubUrl} target="_blank" rel="noreferrer" className="flexCenter gap-2 tex-sm font-medium text-primary-purple">
