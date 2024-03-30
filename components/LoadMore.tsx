@@ -5,12 +5,12 @@ import React, { useState, useEffect } from 'react'
 import Button from './Button'
 
 type Props = {
-    startCursor: string
-    endCursor: string
+    // startCursor: string
+    // endCursor: string
     hasNextPage: boolean
     hasPrevPage: boolean
 }
-const LoadMore = ({ startCursor, endCursor, hasNextPage, hasPrevPage }: Props) => {
+const LoadMore = ({  hasNextPage, hasPrevPage }: Props) => {
     const router = useRouter()
     const params = useSearchParams()
     const [number, setnumber] = useState(() => 2)
@@ -33,12 +33,25 @@ const LoadMore = ({ startCursor, endCursor, hasNextPage, hasPrevPage }: Props) =
         return count
     }
 
+    const prevPageNum = () => {
+        setnumber((prev) => {
+            console.log(params.get('nextPage'), count)
+            prev = count
+            return prev
+        })
+        const count = parseInt(params.get('nextPage')!) - 1
+        return count
+    }
+
     const handleNavigation = (type: string) => {
         const currentParams = new URLSearchParams(window.location.search);
 
         if (type === "prev" && hasPrevPage) {
-            currentParams.delete("endcursor");
-            currentParams.set("startcursor", startCursor);
+            const num = prevPageNum()
+            currentParams.delete("nextPage");
+            currentParams.set("nextPage", num.toString());
+            // currentParams.delete("endcursor");
+            // currentParams.set("startcursor", startCursor);
         } else if (type === "next" && hasNextPage) {
             if (params.get('nextPage')) {
                 const num = changePageNumber()
@@ -59,9 +72,9 @@ const LoadMore = ({ startCursor, endCursor, hasNextPage, hasPrevPage }: Props) =
     return (
         <div className='w-full flexCenter gap-5 mt-10'>
             {hasPrevPage &&
-                <Button title='Prev Page' handleClick={() => handleNavigation('first')} />}
+                <Button title='Prev Page' handleClick={() => handleNavigation('prev')} />}
             {hasNextPage &&
-                <Button title='Load More' handleClick={() => handleNavigation('next')} />}
+                <Button title='Next Page' handleClick={() => handleNavigation('next')} />}
         </div>
     )
 }

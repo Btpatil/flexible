@@ -1,6 +1,10 @@
-import { ProjectForm } from "@/common.types";
+'use server'
+import { ProjectForm, UserProfile, UserType } from "@/common.types";
 import { createProjectMutation, createUserQuery, deleteProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsByCateforyAndEndcursorQuery, projectsByCategoryQuery, projectsByEndcursorQuery, projectsQuery, updateProjectMutation } from "@/graphql";
 import { GraphQLClient } from "graphql-request";
+import User from '@/models/User'
+import ProjectModel from "@/models/Project";
+import { getconnectionToMongoDB } from "./connection";
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -27,20 +31,50 @@ const makeGraphQlRequest = async (query: string, variables = {}) => {
     }
 }
 
-export const getUser = (email: string) => {
-    client.setHeader('x-api-key', apikey)
-    return makeGraphQlRequest(getUserQuery, { email })
+export const getUser = async (email: string) => {
+    // depricated Grafbase code
+    // client.setHeader('x-api-key', apikey)
+    // return makeGraphQlRequest(getUserQuery, { email })
+
+    // new mongo connection
+    try {
+        getconnectionToMongoDB()
+        const user = await User.findOne({ email: email });
+        return user
+    } catch (error: any) {
+        throw new Error("Some Error occured" + error.message)
+        // return null
+    }
+
 }
 
-export const createUser = (name: string, avatarUrl: string, email: string) => {
-    client.setHeader('x-api-key', apikey)
+export const createUser = async (name: string, avatarUrl: string, email: string) => {
+    // depricated Grafbase code
+    // client.setHeader('x-api-key', apikey)
 
-    const variables = {
-        input: {
-            name, email, avatarUrl
-        }
+    // const variables = {
+    //     input: {
+    //         name, email, avatarUrl
+    //     }
+    // }
+    // return makeGraphQlRequest(createUserQuery, variables)
+
+    try {
+        await getconnectionToMongoDB()
+
+        const newUser = new User({
+            name,
+            email,
+            avatarUrl
+        });
+
+        const saveUser = await newUser.save()
+        // console.log(saveUser)
+        return saveUser;
+
+    } catch (error: any) {
+        throw new Error(`Some problem occured while creating User! ${error.message}`)
     }
-    return makeGraphQlRequest(createUserQuery, variables)
 }
 
 export const fetchToken = async () => {
@@ -66,34 +100,144 @@ export const uploadImage = async (img: string) => {
 
 export const createNewProject = async (form: ProjectForm, creatorId: string, token: string) => {
     const imageUrl = await uploadImage(form.image)
+
+    // depricted db
+    // if (imageUrl.url) {
+    //     client.setHeader('Authorization', `Bearer ${token}`)
+    //     const variables = {
+    //         input: {
+    //             ...form,
+    //             image: imageUrl.url,
+    //             createdBy: {
+    //                 link: creatorId
+    //             }
+    //         }
+    //     }
+
+    //     return makeGraphQlRequest(createProjectMutation, variables)
+    // }
+
+
+    // new mongodb 
     if (imageUrl.url) {
-        client.setHeader('Authorization', `Bearer ${token}`)
-        const variables = {
-            input: {
+        try {
+            const data = {
                 ...form,
                 image: imageUrl.url,
-                createdBy: {
-                    link: creatorId
-                }
+                createdBy: creatorId
             }
-        }
 
-        return makeGraphQlRequest(createProjectMutation, variables)
+            await getconnectionToMongoDB()
+
+            const newProject = await ProjectModel.create({
+                title: data.title,
+                description: data.description,
+                image: data.image,
+                liveSiteUrl: data.liveSiteUrl,
+                githubUrl: data.githubUrl,
+                category: data.category,
+                createdBy: data.createdBy
+            });
+
+            await User.findByIdAndUpdate(creatorId, {
+                $push: {
+                    projects: newProject._id
+                }
+            })
+
+            return newProject
+
+        } catch (error: any) {
+            throw new Error(`Some problem occured while adding your Work Details! ${error.message}`)
+        }
     }
+
+    return null
 }
 
-export const fetchAllProjectsByCategory = async (category?: string, numberOfProects?: string) => {
-    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
+export const fetchAllProjectsByCategory = async (category?: string, p?: string) => {
+    // new
+    const page = p ? parseInt(p) : 1
+    const perPage = 8
+    const skip = page ? (page - 1) * perPage : 0
 
-    client.setHeader("x-api-key", apikey)
-    if(category) return makeGraphQlRequest(projectsByCategoryQuery, {n, category})
+    try {
+        await getconnectionToMongoDB()
+
+        const totalProjects = await ProjectModel.where({
+            category: category
+        }).countDocuments()
+        const totalPages = Math.ceil(totalProjects / perPage)
+
+        const projects = await ProjectModel
+            .find({
+                category,
+            })
+            .skip(skip)
+            .limit(perPage)
+            .populate('createdBy')
+            .lean()
+            .exec()
+
+        const hasNextPage = page ? page < totalPages : totalPages > 1 ? true : false
+        const hasPreviousPage = page ? page > 1 : false
+
+        return {
+            projects,
+            totalProjects,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage
+        }
+    } catch (error) {
+        // throw new Error("Failed to fetch the Projects")
+        console.log(error)
+    }
+
+    // deprecated
+    // let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!) * 4
+
+    // client.setHeader("x-api-key", apikey)
+    // if (category) return makeGraphQlRequest(projectsByCategoryQuery, { n, category })
 };
 
-export const fetchAllProjects = async (endcursor?: string, numberOfProects?: string) => {
-    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
+export const fetchAllProjects = async (p?: string) => {
+    // let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!) * 4
+    const page = p ? parseInt(p) : 1
+    const perPage = 8
+    const skip = page ? (page - 1) * perPage : 0
 
-    client.setHeader("x-api-key", apikey);
-    if(!endcursor) return makeGraphQlRequest(projectsQuery, {n});
+    try {
+        await getconnectionToMongoDB()
+
+        const totalProjects = await ProjectModel.countDocuments()
+        const totalPages = Math.ceil(totalProjects / perPage)
+
+        const projects = await ProjectModel
+            .find()
+            .skip(skip)
+            .limit(perPage)
+            .populate('createdBy')
+            .lean()
+            .exec()
+
+        const hasNextPage = page ? page < totalPages : totalPages > 1 ? true : false
+        const hasPreviousPage = page ? page > 1 : false
+
+        return {
+            projects,
+            totalProjects,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage
+        }
+    } catch (error) {
+        // throw new Error("Failed to fetch the Projects")
+        console.log(error)
+    }
+
+    // client.setHeader("x-api-key", apikey);
+    // if (!endcursor) return makeGraphQlRequest(projectsQuery, { n });
     // else if(category && !endcursor) return makeGraphQlRequest(projectsByCategoryQuery, {category})
     // else if(!category && endcursor) {
     //     const data = await makeGraphQlRequest(projectsByEndcursorQuery, {endcursor})
@@ -104,37 +248,123 @@ export const fetchAllProjects = async (endcursor?: string, numberOfProects?: str
 
 };
 
-export const getProjectDetails = (id: string) => {
-    client.setHeader("x-api-key", apikey);
+export const getProjectDetails = async (id: string) => {
+    // new
 
-    return makeGraphQlRequest(getProjectByIdQuery, { id });
+    try {
+        await getconnectionToMongoDB()
+
+        const project = await ProjectModel
+            .findById(id)
+            .populate('createdBy')
+            .exec()
+
+        return { project }
+    } catch (error) {
+        // throw new Error("Failed to fetch the Projects")
+        console.log(error)
+    }
+
+    // deprecated
+    // client.setHeader("x-api-key", apikey);
+
+    // return makeGraphQlRequest(getProjectByIdQuery, { id });
 };
 
-export const getUserProjects = (id: string, numberOfProects?: string) => {
-    client.setHeader("x-api-key", apikey);
-    let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!)*4
+export const getProjectForEditingDetails = async (id: string) => {
+    // new
 
-    return makeGraphQlRequest(getProjectsOfUserQuery, { id, n });
+    try {
+        await getconnectionToMongoDB()
+
+        const project = await ProjectModel
+            .findById(id)
+
+        return { project }
+    } catch (error) {
+        // throw new Error("Failed to fetch the Projects")
+        console.log(error)
+    }
+
+    // deprecated
+    // client.setHeader("x-api-key", apikey);
+
+    // return makeGraphQlRequest(getProjectByIdQuery, { id });
+};
+
+export const getUserProjects = async (id: string, numberOfProects?: string) => {
+    // new
+    try {
+        await getconnectionToMongoDB()
+
+        const user = await User
+            .findById(id)
+            .populate('projects')
+            .exec()
+
+        return { user }
+    } catch (error) {
+        // throw new Error("Failed to fetch the Projects")
+        console.log(error)
+    }
+
+    // deprecated
+    // client.setHeader("x-api-key", apikey);
+    // let n = numberOfProects == undefined ? 4 : parseInt(numberOfProects!) * 4
+
+    // return makeGraphQlRequest(getProjectsOfUserQuery, { id, n });
 };
 
 
-export const deleteProject = (id: string, token: number) => {
-    client.setHeader('Authorization', `Bearer ${token}`)
+export const deleteProject = async (id: string, userId: string) => {
+    // new
+    try {
+        await getconnectionToMongoDB()
 
-    return makeGraphQlRequest(deleteProjectMutation, { id });
+        const deletedProject = await ProjectModel
+            .findByIdAndDelete(id)
+
+        console.log(deletedProject)
+
+        if (!deleteProject) {
+            throw new Error("Project not found or Already daleted")
+        }
+
+        await User.findByIdAndUpdate(userId, {
+            $pull: {
+                projects: id
+            }
+        })
+
+
+    } catch (error) {
+        throw new Error("Failed to delete the Project")
+        // console.log(error)
+    }
+
+    // deprecated
+    // client.setHeader('Authorization', `Bearer ${token}`)
+
+    // return makeGraphQlRequest(deleteProjectMutation, { id });
 };
 
 export const updateProject = async (form: ProjectForm, projectId: string, token: number) => {
 
-    function isBase64DataUrl(value: string){
+    function isBase64DataUrl(value: string) {
         const base64Regex = /^data:image\/[a-z]+;base64,/
         return base64Regex.test(value)
     }
-    let updatedForm = {...form}
+
+
+    let updatedForm = { ...form }
+
     const isUploadingNewImage = isBase64DataUrl(form.image)
+
     console.log(isUploadingNewImage)
+
     if (isUploadingNewImage) {
         const imageUrl = await uploadImage(form.image)
+
 
         if (imageUrl.url) {
             updatedForm = {
@@ -142,14 +372,49 @@ export const updateProject = async (form: ProjectForm, projectId: string, token:
                 image: imageUrl.url
             }
         }
+    }else{
+        updatedForm = {
+            ...form
+        }
+    }
+    // new mongodb 
+    try {
+
+        await getconnectionToMongoDB()
+
+        const updateProject = await ProjectModel.findByIdAndUpdate(projectId, {
+            title: updatedForm.title,
+            description: updatedForm.description,
+            image: updatedForm.image,
+            liveSiteUrl: updatedForm.liveSiteUrl,
+            githubUrl: updatedForm.githubUrl,
+            category: updatedForm.category,
+            // createdBy: updatedForm.createdBy
+        });
+
+        // await User.findByIdAndUpdate(creatorId, {
+        //     $push: {
+        //         projects: newProject._id
+        //     }
+        // })
+
+        return updateProject
+
+    } catch (error: any) {
+        throw new Error(`Some problem occured while adding your Work Details! ${error.message}`)
     }
 
-    const variables = {
-        id: projectId,
-        input: updatedForm
-    }
+    return null
+}
 
-    client.setHeader('Authorization', `Bearer ${token}`)
+// const variables = {
+//     id: projectId,
+//     input: updatedForm
+// }
 
-    return makeGraphQlRequest(updateProjectMutation, variables);
-};
+// client.setHeader('Authorization', `Bearer ${token}`)
+
+// return makeGraphQlRequest(updateProjectMutation, variables);
+
+// return null
+// }

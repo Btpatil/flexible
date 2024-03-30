@@ -19,7 +19,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
 
     const projectDetails = result?.project
 
-    const renderLink = () => `/profile/${projectDetails?.createdBy?.id}`
+    const renderLink = () => `/profile/${projectDetails?.createdBy?._id}`
 
     return (
         <Modal>
@@ -53,7 +53,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
 
                 {session?.user?.email === projectDetails?.createdBy?.email && (
                     <div className="flex justify-end items-center gap-2">
-                        <ProjectActions projectId={projectDetails?.id} />
+                        <ProjectActions projectId={projectDetails?._id} userId={projectDetails?.createdBy?._id} />
                     </div>
                 )}
             </section>
@@ -97,7 +97,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
                 <span className="w-full h-0.5 bg-light-white-200" />
             </section>
 
-            <RelatedProjects userId={projectDetails?.createdBy?.id} projectId={projectDetails?.id} />
+            <RelatedProjects userId={projectDetails?.createdBy?._id} projectId={projectDetails?._id} />
         </Modal>
     )
 }

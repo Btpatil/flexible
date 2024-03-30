@@ -19,6 +19,7 @@
     "encoding": "^0.1.13",
     "graphql-request": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.2.3",
     "next": "13.4.9",
     "next-auth": "^4.22.1",
     "next13-progressbar": "^1.1.2",

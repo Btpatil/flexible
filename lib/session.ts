@@ -5,6 +5,8 @@ import GoogleProvider from 'next-auth/providers/google'
 import { JWT } from "next-auth/jwt";
 import { SessionInterface, UserProfile } from '@/common.types';
 import { createUser, getUser } from './actions';
+import USER from '@/models/User';
+import { getconnectionToMongoDB } from './connection';
 
 var jsonwebtoken = require('jsonwebtoken');
 
@@ -24,7 +26,7 @@ export const authOptions: NextAuthOptions = {
                     iss: 'grafbase',
                     exp: Math.floor(Date.now() + 365)
                 }, secret)
-
+                // console.log(encodedYoken)
                 return encodedYoken
             } catch (error) {
                 console.log(error)
@@ -32,27 +34,30 @@ export const authOptions: NextAuthOptions = {
         },
         decode: async ({ secret, token }) => {
             const decodedToken = jsonwebtoken.verify(token!, secret) as JWT
+            // console.log(decodedToken)
             return decodedToken
         }
     },
     theme: {
-        colorScheme: 'light',
+        // colorScheme: 'light',
         logo: '/logo.svg'
     },
     callbacks: {
         async session({ session }) {
             const email = session?.user?.email as string
 
+            // console.log(session)
+
             try {
-                const data = await getUser(email) as { user?: UserProfile }
+                const data = await getUser(email)
                 const newSession = {
                     ...session,
                     user: {
                         ...session.user,
-                        ...data.user
+                        id: data._id.toString()
                     }
                 }
-
+                // console.log(newSession)
                 return newSession
             } catch (error) {
                 console.log(error)
@@ -63,14 +68,19 @@ export const authOptions: NextAuthOptions = {
             try {
                 // get user
                 const userExist = await getUser(user?.email as string) as { user?: UserProfile }
-
+                // console.log(userExist)
+                
                 // create  user
-                if (!userExist.user) {
-                    await createUser(
-                        user.name as string,
-                        user.image as string,
-                        user.email as string
-                    )
+                if (!userExist) {
+                    const newUser = new USER({
+                        name: user.name,
+                        email: user.email,
+                        avatarUrl: user.image
+                    });
+            
+                    const saveUser = await newUser.save()
+                    console.log(saveUser)
+                    return true;
                 }
 
                 // return
@@ -85,6 +95,7 @@ export const authOptions: NextAuthOptions = {
 
 export async function getCurrentUser() {
     try {
+        getconnectionToMongoDB()
         const session = await getServerSession(authOptions) as SessionInterface
 
         return session

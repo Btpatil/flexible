@@ -27,10 +27,10 @@ type Props = {
 }
 
 export default async function page({ searchParams: { category, endcursor, nextPage } }: Props) {
-    const userId = 'user_01HABVVTVGQP1VKJ3061XD6DFW'
+    const userId = '66000845db3f615e0e8c009c'
     const result = await getUserProjects(userId, nextPage) as { user?: UserProfile }
-    const filteredProjects = result?.user?.projects?.edges
-        ?.filter(({ node }: { node: ProjectInterface }) => node?.id !== null)
+    const filteredProjects = result?.user?.projects
+        ?.filter((node) => node?._id.toString() !== null)
 
     // filteredProjects?.sort((a, b) => {
     //     const dateA = new Date(a.node.updatedAt) as any;
@@ -40,7 +40,7 @@ export default async function page({ searchParams: { category, endcursor, nextPa
     // });
     // console.log(sortedData)
 
-    const pageInfo = result?.user?.projects?.pageInfo as PageInfo
+    // const pageInfo = result?.user?.projects?.pageInfo as PageInfo
 
     return (
         <>
@@ -173,8 +173,8 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                 <section className="min-h-[400px] py-16 min-w-full" id='projects'>
                     <div className="flex text-5xl font-extrabold text-black font-mono ">PROJECTS</div>
                     <section className="projects-grid">
-                        {filteredProjects?.map(({ node }: { node: ProjectInterface }) => (
-                            <Link href={`/project/${node?.id}`} className="flexCenter group relative w-full h-full ">
+                        {filteredProjects?.map((node) => (
+                            <Link href={`/project/${node?._id}`} className="flexCenter group relative w-full h-full ">
                                 <Image src={node?.image} width={414} height={314} className="w-full h-full object-cover rounded-2xl border border-black/50" alt="project image" />
 
                                 <div className="hidden group-hover:flex related_project-card_title">
@@ -183,12 +183,12 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                             </Link>
                         ))}
                     </section>
-                    <LoadMore
+                    {/* <LoadMore
                         startCursor={pageInfo.startCursor}
                         endCursor={pageInfo.endCursor}
                         hasNextPage={pageInfo.hasNextPage}
                         hasPrevPage={pageInfo.hasPreviousPage}
-                    />
+                    /> */}
                 </section>
 
             </section>

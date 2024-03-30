@@ -6,12 +6,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { deleteProject, fetchToken } from '@/lib/actions'
+import { revalidatePath } from 'next/cache'
 
 type Props = {
     projectId: string
+    userId: string
 }
 
-const ProjectActions = ({ projectId }: Props) => {
+const ProjectActions = ({ projectId, userId }: Props) => {
     const [isDeleting, setIsDeleting] = useState<boolean>(false)
     const router = useRouter()
 
@@ -19,11 +21,12 @@ const ProjectActions = ({ projectId }: Props) => {
     const handleDeleteProject = async () => {
         setIsDeleting(true)
         
-        const { token } = await fetchToken();
+        // const { token } = await fetchToken();
 
         try {
-            await deleteProject(projectId, token);
+            await deleteProject(projectId, userId);
             
+            // revalidatePath('/')
             router.push("/");
         } catch (error) {
             console.error(error)

@@ -9,6 +9,7 @@ import Button from "./Button"
 import { createNewProject, fetchToken, updateProject } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 import { FormRichTextDescription } from "./FormRichTextDescription"
+import { revalidatePath } from "next/cache"
 
 type Props = {
     type: string,
@@ -18,24 +19,32 @@ type Props = {
 
 const ProjectForm = ({ type, session, project }: Props) => {
     const router = useRouter()
-    const handleFormSubmit = async(e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSubmiting(true)
 
-        const {token} = await fetchToken()
+        const { token } = await fetchToken()
         try {
             if (type === 'create') {
-                await createNewProject(form, session?.user?.id, token)
-
-                router.push('/')
+                const res = await createNewProject(form, session?.user?.id, token)
+                // console.log(res)
+                if (res != null) {
+                    // revalidatePath('/')
+                    router.push('/')
+                }
             }
             if (type === 'edit') {
-                await updateProject(form, project?.id as string, token)
+                const res = await updateProject(form, project?._id as string, token)
 
-                router.push('/')
+                if (res != null) {
+                    // revalidatePath('/')
+                    router.push('/')
+                }
             }
-        } catch (error) {
-            console.log(error)
+        } catch (err: any) {
+            setHasError(err)
+        } finally {
+            setIsSubmiting(false)
         }
     }
 
@@ -64,11 +73,11 @@ const ProjectForm = ({ type, session, project }: Props) => {
         setForm(prevState => ({
             ...prevState, [fieldName]: fieldValue
         }))
-        // console.log(form)
     }
-
+    
     const [isSubmiting, setIsSubmiting] = useState(false)
-
+    const [haserror, setHasError] = useState<string>("")
+    console.log(haserror)
     const [form, setForm] = useState({
         title: project?.title || '',
         description: project?.description || '',
@@ -112,12 +121,12 @@ const ProjectForm = ({ type, session, project }: Props) => {
                 placeholder='flexible'
             />
 
-            <FormRichTextDescription 
-                            title='description'
-                            state={form.description}
-                            // isTextArea={true}
-                            setState={(value) => handleStateChange('description', value)}
-                            placeholder='Showcase and Discover your Projects'
+            <FormRichTextDescription
+                title='description'
+                state={form.description}
+                // isTextArea={true}
+                setState={(value) => handleStateChange('description', value)}
+                placeholder='Showcase and Discover your Projects'
             />
 
             <FormField
@@ -150,6 +159,13 @@ const ProjectForm = ({ type, session, project }: Props) => {
                     leftIcon={isSubmiting ? '' : '/plus.svg'}
                     isSubmiting={isSubmiting}
                 />
+
+                {
+                    haserror !== "" &&
+                    <div className=" w-full h-8 bg-yellow-50/30 rounded-md flex items-center justify-center text-yellow-900 my-5">
+                        {haserror}
+                    </div>
+                }
             </div>
         </form>
     )
