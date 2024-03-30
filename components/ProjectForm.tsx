@@ -9,7 +9,6 @@ import Button from "./Button"
 import { createNewProject, fetchToken, updateProject } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 import { FormRichTextDescription } from "./FormRichTextDescription"
-import { revalidatePath } from "next/cache"
 
 type Props = {
     type: string,
@@ -23,10 +22,10 @@ const ProjectForm = ({ type, session, project }: Props) => {
         e.preventDefault()
         setIsSubmiting(true)
 
-        const { token } = await fetchToken()
+        // const { token } = await fetchToken()
         try {
             if (type === 'create') {
-                const res = await createNewProject(form, session?.user?.id, token)
+                const res = await createNewProject(form, session?.user?.id)
                 // console.log(res)
                 if (res != null) {
                     // revalidatePath('/')
@@ -34,7 +33,7 @@ const ProjectForm = ({ type, session, project }: Props) => {
                 }
             }
             if (type === 'edit') {
-                const res = await updateProject(form, project?._id as string, token)
+                const res = await updateProject(form, project?._id as string)
 
                 if (res != null) {
                     // revalidatePath('/')
@@ -42,7 +41,7 @@ const ProjectForm = ({ type, session, project }: Props) => {
                 }
             }
         } catch (err: any) {
-            setHasError(err)
+            setHasError(err.message)
         } finally {
             setIsSubmiting(false)
         }
@@ -77,7 +76,7 @@ const ProjectForm = ({ type, session, project }: Props) => {
     
     const [isSubmiting, setIsSubmiting] = useState(false)
     const [haserror, setHasError] = useState<string>("")
-    console.log(haserror)
+
     const [form, setForm] = useState({
         title: project?.title || '',
         description: project?.description || '',

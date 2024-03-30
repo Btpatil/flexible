@@ -85,6 +85,7 @@ export const fetchToken = async () => {
         throw error
     }
 }
+
 export const uploadImage = async (img: string) => {
     try {
         const res = await fetch(`${serverurl}/api/upload`, {
@@ -92,14 +93,16 @@ export const uploadImage = async (img: string) => {
             body: JSON.stringify({ path: img })
         })
 
-        return res.json()
-    } catch (error) {
-        throw error
+        const data = await res.json()
+        console.log(data)
+        if(!data?.url) throw new Error(data?.message)
+        return data
+    } catch (error: any) {
+        throw new Error("Could not upload the image ", error)
     }
 }
 
-export const createNewProject = async (form: ProjectForm, creatorId: string, token: string) => {
-    const imageUrl = await uploadImage(form.image)
+export const createNewProject = async (form: ProjectForm, creatorId: string) => {
 
     // depricted db
     // if (imageUrl.url) {
@@ -119,8 +122,10 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
 
 
     // new mongodb 
-    if (imageUrl.url) {
-        try {
+    try {
+        const imageUrl = await uploadImage(form.image)
+
+        if (imageUrl.url) {
             const data = {
                 ...form,
                 image: imageUrl.url,
@@ -146,10 +151,9 @@ export const createNewProject = async (form: ProjectForm, creatorId: string, tok
             })
 
             return newProject
-
-        } catch (error: any) {
-            throw new Error(`Some problem occured while adding your Work Details! ${error.message}`)
         }
+    } catch (error: any) {
+        throw new Error(`Some problem occured while adding your Work Details! ${error.message}`)
     }
 
     return null
@@ -348,37 +352,36 @@ export const deleteProject = async (id: string, userId: string) => {
     // return makeGraphQlRequest(deleteProjectMutation, { id });
 };
 
-export const updateProject = async (form: ProjectForm, projectId: string, token: number) => {
-
+export const updateProject = async (form: ProjectForm, projectId: string) => {
+    
+    // new mongodb 
     function isBase64DataUrl(value: string) {
         const base64Regex = /^data:image\/[a-z]+;base64,/
         return base64Regex.test(value)
     }
 
-
-    let updatedForm = { ...form }
-
-    const isUploadingNewImage = isBase64DataUrl(form.image)
-
-    console.log(isUploadingNewImage)
-
-    if (isUploadingNewImage) {
-        const imageUrl = await uploadImage(form.image)
-
-
-        if (imageUrl.url) {
+    try {    
+        let updatedForm = { ...form }
+    
+        const isUploadingNewImage = isBase64DataUrl(form.image)
+    
+        // console.log(isUploadingNewImage)
+    
+        if (isUploadingNewImage) {
+            const imageUrl = await uploadImage(form.image)
+    
+    
+            if (imageUrl.url) {
+                updatedForm = {
+                    ...form,
+                    image: imageUrl.url
+                }
+            }
+        } else {
             updatedForm = {
-                ...form,
-                image: imageUrl.url
+                ...form
             }
         }
-    }else{
-        updatedForm = {
-            ...form
-        }
-    }
-    // new mongodb 
-    try {
 
         await getconnectionToMongoDB()
 
