@@ -1,10 +1,11 @@
 'use server'
 import { ProjectForm, UserProfile, UserType } from "@/common.types";
-import { createProjectMutation, createUserQuery, deleteProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsByCateforyAndEndcursorQuery, projectsByCategoryQuery, projectsByEndcursorQuery, projectsQuery, updateProjectMutation } from "@/graphql";
-import { GraphQLClient } from "graphql-request";
+// import { createProjectMutation, createUserQuery, deleteProjectMutation, getProjectByIdQuery, getProjectsOfUserQuery, getUserQuery, projectsByCateforyAndEndcursorQuery, projectsByCategoryQuery, projectsByEndcursorQuery, projectsQuery, updateProjectMutation } from "@/graphql";
+// import { GraphQLClient } from "graphql-request";
 import User from '@/models/User'
 import ProjectModel from "@/models/Project";
 import { getconnectionToMongoDB } from "./connection";
+import axios from "axios";
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -13,23 +14,23 @@ const isProduction = process.env.NODE_ENV === 'production'
 const apiurl = 'https://flexible-main-btpatil.grafbase.app/graphql'
 
 // const apikey = isProduction ? process.env.NEXT_API_KEY || '' : '1234'
-const getApiKey = () => {
-    const apikey = process.env.NEXT_API_KEY
-    return apikey
-}
-const apikey = getApiKey()!
+// const getApiKey = () => {
+//     const apikey = process.env.NEXT_API_KEY
+//     return apikey
+// }
+// const apikey = getApiKey()!
 
 const serverurl = isProduction ? process.env.NEXT_PUBLIC_SERVER_URL : 'http://localhost:3000'
 
-const client = new GraphQLClient(apiurl)
+// const client = new GraphQLClient(apiurl)
 
-const makeGraphQlRequest = async (query: string, variables = {}) => {
-    try {
-        return await client.request(query, variables)
-    } catch (error: any) {
-        console.log(error)
-    }
-}
+// const makeGraphQlRequest = async (query: string, variables = {}) => {
+//     try {
+//         return await client.request(query, variables)
+//     } catch (error: any) {
+//         console.log(error)
+//     }
+// }
 
 export const getUser = async (email: string) => {
     // depricated Grafbase code
@@ -88,17 +89,25 @@ export const fetchToken = async () => {
 
 export const uploadImage = async (img: string) => {
     try {
+        // const res = await axios({
+        //     url: `${serverurl}/api/upload`,
+        //     method: 'POST',
+        //     data: {
+        //         path: img
+        //     }
+        // })
         const res = await fetch(`${serverurl}/api/upload`, {
             method: 'POST',
             body: JSON.stringify({ path: img })
         })
 
+        // const data = res.data
         const data = await res.json()
         console.log(data)
         if(!data?.url) throw new Error(data?.message)
         return data
     } catch (error: any) {
-        throw new Error("Could not upload the image ", error)
+        throw new Error("Could not upload the image ", error.message)
     }
 }
 
@@ -124,7 +133,7 @@ export const createNewProject = async (form: ProjectForm, creatorId: string) => 
     // new mongodb 
     try {
         const imageUrl = await uploadImage(form.image)
-
+        console.log(imageUrl)
         if (imageUrl.url) {
             const data = {
                 ...form,
@@ -132,9 +141,11 @@ export const createNewProject = async (form: ProjectForm, creatorId: string) => 
                 createdBy: creatorId
             }
 
+            console.log(data)
+
             await getconnectionToMongoDB()
 
-            const newProject = await ProjectModel.create({
+            const formdata = {
                 title: data.title,
                 description: data.description,
                 image: data.image,
@@ -142,7 +153,12 @@ export const createNewProject = async (form: ProjectForm, creatorId: string) => 
                 githubUrl: data.githubUrl,
                 category: data.category,
                 createdBy: data.createdBy
-            });
+            }
+
+            const newProject = await ProjectModel.create(formdata);
+
+
+            console.log(newProject)
 
             await User.findByIdAndUpdate(creatorId, {
                 $push: {
@@ -150,7 +166,7 @@ export const createNewProject = async (form: ProjectForm, creatorId: string) => 
                 }
             })
 
-            return newProject
+            return {...formdata, _id: newProject._id.toString()}
         }
     } catch (error: any) {
         throw new Error(`Some problem occured while adding your Work Details! ${error.message}`)
