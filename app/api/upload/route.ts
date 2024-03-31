@@ -9,6 +9,7 @@ cloudinary.config({
 
 export async function POST(req: Request) {
     const {path} = await req.json()
+    console.log("line 12 ", path)
     if (!path) {
         return NextResponse.json(
             {message: 'Image path is required'},
@@ -25,9 +26,10 @@ export async function POST(req: Request) {
         }
 
         const result = await cloudinary.uploader.upload(path, options)
-
+        console.log("line 29 ", result)
         return NextResponse.json(result, {status: 200})
-    } catch (error) {
-        return NextResponse.json({message: error}, {status: 500})
+    } catch (error: any) {
+        console.log("line 32 ", error.message)
+        return NextResponse.json({message: error.message}, {status: 500})
     }
 }

@@ -96,14 +96,16 @@ export const uploadImage = async (img: string) => {
         //         path: img
         //     }
         // })
+        console.log("line 99", img)
         const res = await fetch(`${serverurl}/api/upload`, {
             method: 'POST',
             body: JSON.stringify({ path: img })
         })
 
         // const data = res.data
+        const text = await res.text()
+        console.log(text)
         const data = await res.json()
-        console.log(data)
         if(!data?.url) throw new Error(data?.message)
         return data
     } catch (error: any) {
