@@ -6,9 +6,11 @@ import FormField from "./FormField"
 import { categoryFilters } from "@/constants"
 import CustomMenu from "./CustomMenu"
 import Button from "./Button"
-import { createNewProject, fetchToken, updateProject } from "@/lib/actions"
+import { createNewProject, revalidateThePath, updateProject } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 import { FormRichTextDescription } from "./FormRichTextDescription"
+import axios from "axios"
+import { serverurl } from "@/lib/constants"
 
 type Props = {
     type: string,
@@ -21,26 +23,46 @@ const ProjectForm = ({ type, session, project }: Props) => {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsSubmiting(true)
+        setHasError("")
 
         // const { token } = await fetchToken()
         try {
             if (type === 'create') {
-                const res = await createNewProject(form, session?.user?.id)
-                // console.log(res)
-                if (res != null) {
-                    // revalidatePath('/')
+                // const res = await createNewProject(form, session?.user?.id)
+
+                const res = await axios({
+                    url: `${serverurl}/api/project`,
+                    method: 'post',
+                    data: form,
+                })
+
+                if (res.status == 200) {
+                    await revalidateThePath('/')
                     router.push('/')
+                }else{
+                    throw new Error(res.data?.error || "Something went wrong")
                 }
             }
             if (type === 'edit') {
-                const res = await updateProject(form, project?._id as string)
+                const res = await axios({
+                    url: `${serverurl}/api/project`,
+                    method: 'put',
+                    data: {
+                        ...form,
+                        projectId: project?._id,
+                    },
+                })
+                // const res = await updateProject(form, project?._id as string)
 
-                if (res != null) {
-                    // revalidatePath('/')
+                if (res.status == 200) {
+                    await revalidateThePath('/')
                     router.push('/')
+                }else{
+                    throw new Error(res.data?.error || "Something went wrong")
                 }
             }
         } catch (err: any) {
+            console.log(err)
             setHasError(err.message)
         } finally {
             setIsSubmiting(false)

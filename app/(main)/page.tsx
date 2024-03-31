@@ -103,8 +103,8 @@ export default async function Home({ searchParams: { category, endcursor, nextPa
   return (
     <section className="flexStart flex-col paddings mb-16">
 
-      <div className=" w-full h-8 bg-yellow-50/30 rounded-md flex items-center justify-center text-yellow-900 my-5">
-        <PiWarningDiamond /> &nbsp;&nbsp;
+      <div className=" w-full h-8 py-5 bg-yellow-100 rounded-md border-2 border-yellow-700 flex items-center justify-center text-yellow-900 font-bold my-5">
+        <PiWarningDiamond className='font-bold text-lg' /> &nbsp;&nbsp;
         Note: Few of the Links Does not work! They Might work in Future
       </div>
 

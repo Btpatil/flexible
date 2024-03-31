@@ -6,12 +6,12 @@ import User from '@/models/User'
 import ProjectModel from "@/models/Project";
 import { getconnectionToMongoDB } from "./connection";
 import axios from "axios";
-
-const isProduction = process.env.NODE_ENV === 'production'
+import { revalidatePath } from "next/cache";
+import { serverurl } from "./constants";
 
 // const apiurl = isProduction ? process.env.NEXT_GRAFBASE_API_ENDPOINT || '' : 'http://127.0.0.1:4000/graphql'
 
-const apiurl = 'https://flexible-main-btpatil.grafbase.app/graphql'
+
 
 // const apikey = isProduction ? process.env.NEXT_API_KEY || '' : '1234'
 // const getApiKey = () => {
@@ -20,7 +20,7 @@ const apiurl = 'https://flexible-main-btpatil.grafbase.app/graphql'
 // }
 // const apikey = getApiKey()!
 
-const serverurl = isProduction ? process.env.NEXT_PUBLIC_SERVER_URL : 'http://localhost:3000'
+
 
 // const client = new GraphQLClient(apiurl)
 
@@ -78,14 +78,14 @@ export const createUser = async (name: string, avatarUrl: string, email: string)
     }
 }
 
-export const fetchToken = async () => {
-    try {
-        const res = await fetch(`${serverurl}/api/auth/token`)
-        return res.json()
-    } catch (error) {
-        throw error
-    }
-}
+// export const fetchToken = async () => {
+//     try {
+//         const res = await fetch(`${serverurl}/api/auth/token`)
+//         return res.json()
+//     } catch (error) {
+//         throw error
+//     }
+// }
 
 export const uploadImage = async (img: string) => {
     try {
@@ -168,6 +168,8 @@ export const createNewProject = async (form: ProjectForm, creatorId: string) => 
                 }
             })
 
+            revalidatePath('/')
+            
             return {...formdata, _id: newProject._id.toString()}
         }
     } catch (error: any) {
@@ -358,6 +360,8 @@ export const deleteProject = async (id: string, userId: string) => {
             }
         })
 
+        revalidatePath('/')
+
 
     } catch (error) {
         throw new Error("Failed to delete the Project")
@@ -419,6 +423,8 @@ export const updateProject = async (form: ProjectForm, projectId: string) => {
         //     }
         // })
 
+        revalidatePath('/')
+
         return updateProject
 
     } catch (error: any) {
@@ -426,6 +432,10 @@ export const updateProject = async (form: ProjectForm, projectId: string) => {
     }
 
     return null
+}
+
+export const revalidateThePath = async (path:string) => {
+    revalidatePath(path)
 }
 
 // const variables = {

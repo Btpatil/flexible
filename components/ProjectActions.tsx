@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { deleteProject, fetchToken } from '@/lib/actions'
+import { deleteProject,  } from '@/lib/actions'
 import { revalidatePath } from 'next/cache'
 
 type Props = {
