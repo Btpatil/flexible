@@ -197,6 +197,9 @@ export const fetchAllProjectsByCategory = async (category?: string, p?: string) 
             .find({
                 category,
             })
+            .sort({
+                updatedAt: 'desc',
+            })
             .skip(skip)
             .limit(perPage)
             .populate('createdBy')
@@ -239,6 +242,9 @@ export const fetchAllProjects = async (p?: string) => {
 
         const projects = await ProjectModel
             .find()
+            .sort({
+                updatedAt: 'desc',
+            })
             .skip(skip)
             .limit(perPage)
             .populate('createdBy')

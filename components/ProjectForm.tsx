@@ -58,12 +58,13 @@ const ProjectForm = ({ type, session, project }: Props) => {
                     await revalidateThePath('/')
                     router.push('/')
                 }else{
+                    console.log(res.data?.error)
                     throw new Error(res.data?.error || "Something went wrong")
                 }
             }
         } catch (err: any) {
-            console.log(err)
-            setHasError(err.message)
+            // console.log(err)
+            setHasError(err?.response?.data?.error || err?.message || "something went wrong")
         } finally {
             setIsSubmiting(false)
         }
@@ -181,13 +182,13 @@ const ProjectForm = ({ type, session, project }: Props) => {
                     isSubmiting={isSubmiting}
                 />
 
+            </div>
                 {
                     haserror !== "" &&
-                    <div className=" w-full h-8 bg-yellow-50/30 rounded-md flex items-center justify-center text-yellow-900 my-5">
+                    <div className=" w-full h-8 py-5 bg-red-100 rounded-md border-2 border-red-700 flex items-center justify-center text-red-900 font-bold my-5">
                         {haserror}
                     </div>
                 }
-            </div>
         </form>
     )
 }
