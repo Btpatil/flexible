@@ -264,6 +264,7 @@ export const fetchAllProjects = async (p?: string) => {
     } catch (error) {
         // throw new Error("Failed to fetch the Projects")
         console.log(error)
+        return {error}
     }
 
     // client.setHeader("x-api-key", apikey);

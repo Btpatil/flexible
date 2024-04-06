@@ -43,7 +43,8 @@ interface FetcheProjects {
   totalProjects: number,
   totalPages: number,
   hasNextPage: boolean,
-  hasPreviousPage: boolean
+  hasPreviousPage: boolean,
+  error?: Error
 }
 
 export const dynamic = 'force-dynamic';
@@ -57,7 +58,8 @@ export default async function Home({ searchParams: { category, endcursor, nextPa
     totalProjects,
     totalPages,
     hasNextPage,
-    hasPreviousPage
+    hasPreviousPage,
+    error
   } = category ? await fetchAllProjectsByCategory(category) as FetcheProjects : await fetchAllProjects(nextPage) as FetcheProjects
 
   // console.log(projects)
@@ -88,10 +90,10 @@ export default async function Home({ searchParams: { category, endcursor, nextPa
   if (projects?.length === 0) {
     return (
       <section className="flexStart flex-col paddings">
-      <div className=" w-full h-8 py-5 bg-yellow-100 rounded-md border-2 border-yellow-700 flex items-center justify-center text-yellow-900 font-bold my-5">
-        <PiWarningDiamond className='font-bold text-lg' /> &nbsp;&nbsp;
-        Note: Few of the Links Does not work! They Might work in Future
-      </div>
+        <div className=" w-full h-8 py-5 bg-yellow-100 rounded-md border-2 border-yellow-700 flex items-center justify-center text-yellow-900 font-bold my-5">
+          <PiWarningDiamond className='font-bold text-lg' /> &nbsp;&nbsp;
+          Note: Few of the Links Does not work! They Might work in Future
+        </div>
 
         <Categories />
 
@@ -99,6 +101,16 @@ export default async function Home({ searchParams: { category, endcursor, nextPa
       </section>
     )
   }
+
+  else if (error?.message) return (
+    <section className="flexStart flex-col paddings">
+      <Categories />
+      <div className=" w-full h-8 py-5 bg-red-100 rounded-md border-2 border-red-700 flex items-center justify-center text-red-900 font-bold my-5">
+        {error.message}
+      </div>
+      {/* <p className='no-result-text text-center'>Projects not found 😢. Please add some!!</p> */}
+    </section>
+  )
 
   return (
     <section className="flexStart flex-col paddings mb-16">
