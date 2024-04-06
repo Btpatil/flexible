@@ -9,7 +9,7 @@ import RelatedProjects from "@/components/RelatedProjects"
 import ProjectActions from "@/components/ProjectActions"
 import { ReactNode } from "react"
 
-const Project = async ({ params: { id } }: { params: { id: string } }) => {
+const Project = async ({ params: { id }, searchParams: {nextPage} }: { params: { id: string }, searchParams: {nextPage?: string} }) => {
     const session = await getCurrentUser()
     const result = await getProjectDetails(id) as { project?: ProjectInterface}
 
@@ -97,7 +97,7 @@ const Project = async ({ params: { id } }: { params: { id: string } }) => {
                 <span className="w-full h-0.5 bg-light-white-200" />
             </section>
 
-            <RelatedProjects userId={projectDetails?.createdBy?._id} projectId={projectDetails?._id} />
+            <RelatedProjects user={session} projectId={projectDetails?._id} nextPage={nextPage} />
         </Modal>
     )
 }

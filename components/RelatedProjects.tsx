@@ -1,30 +1,45 @@
 import Link from 'next/link'
 
 import { getUserProjects } from '@/lib/actions'
-import { ProjectInterface, UserProfile } from '@/common.types'
+import { ProjectInterface, SessionInterface, UserProfile } from '@/common.types'
 import Image from 'next/image'
+import LoadMore from './LoadMore'
 
-type Props = {
-    userId: string
-    projectId: string
+interface FetcheProjects {
+    projects: [],
+    totalProjects: number,
+    totalPages: number,
+    hasNextPage: boolean,
+    hasPreviousPage: boolean
 }
 
-const RelatedProjects = async ({ userId, projectId }: Props) => {
-    const result = await getUserProjects(userId) as { user?: UserProfile }
+type Props = {
+    user?: SessionInterface
+    projectId: string
+    nextPage?: string
+}
 
-    const filteredProjects = result?.user?.projects
-        ?.filter((node) => node?._id.toString() !== projectId.toString())
-        
-    if (filteredProjects?.length === 0) return null;
+const RelatedProjects = async ({ user, projectId, nextPage }: Props) => {
+    const {
+        projects,
+        totalProjects,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+    } = await getUserProjects(user?.user.id!, nextPage) as FetcheProjects
+    // const filteredProjects = result?.user?.projects
+    //     ?.filter((node) => node?._id.toString() !== projectId.toString())
+
+    if (projects?.length === 0) return null;
 
     return (
         <section className="flex flex-col mt-32 w-full">
             <div className="flexBetween">
                 <p className="text-base font-bold">
-                    More by {result?.user?.name}
+                    More by {user?.user?.name}
                 </p>
                 <Link
-                    href={`/profile/${result?.user?._id}`}
+                    href={`/profile/${user?.user?.id}`}
                     className="text-primary-purple text-base"
                 >
                     View All
@@ -32,20 +47,29 @@ const RelatedProjects = async ({ userId, projectId }: Props) => {
             </div>
 
             <div className="related_projects-grid">
-                {filteredProjects?.map((node) => <div key={node._id} className="flexCenter related_project-card drop-shadow-card">
-                    <Link href={`/project/${node?._id}`} className="flexCenter group relative w-full h-full">
-                        <Image src={node?.image} width={414} height={314} className="w-full h-full object-cover rounded-2xl" alt="project image" />
+                {projects?.map((node: ProjectInterface) => {
+                    if (node._id !== projectId) {
+                        return (
+                            <div key={node._id} className="flexCenter related_project-card drop-shadow-card">
+                                <Link href={`/project/${node?._id}`} className="flexCenter group relative w-full h-full">
+                                    <Image src={node?.image} width={414} height={314} className="w-full h-full object-cover rounded-2xl" alt="project image" />
 
-                        <div className="hidden group-hover:flex related_project-card_title">
-                            <p className="w-full">{node?.title}</p>
-                        </div>
-                    </Link>
-                </div>)
-
-                }
-
-
+                                    <div className="hidden group-hover:flex related_project-card_title">
+                                        <p className="w-full">{node?.title}</p>
+                                    </div>
+                                </Link>
+                            </div>
+                        )
+                    }
+                })}
             </div>
+
+            <LoadMore
+                // startCursor={pageInfo.startCursor}
+                // endCursor={pageInfo.endCursor}
+                hasNextPage={hasNextPage}
+                hasPrevPage={hasPreviousPage}
+            />
         </section>
     )
 }

@@ -11,11 +11,19 @@ import { AiFillLinkedin, AiFillGithub } from "react-icons/ai";
 import { FiGithub } from "react-icons/fi";
 import { PiLinkedinLogo } from "react-icons/pi";
 
-type PageInfo = {
+// type PageInfo = {
+//     hasPreviousPage: boolean
+//     hasNextPage: boolean
+//     startCursor: string
+//     endCursor: string
+// }
+
+interface FetcheProjects {
+    projects: [],
+    totalProjects: number,
+    totalPages: number,
+    hasNextPage: boolean,
     hasPreviousPage: boolean
-    hasNextPage: boolean
-    startCursor: string
-    endCursor: string
 }
 
 type Props = {
@@ -28,9 +36,15 @@ type Props = {
 
 export default async function page({ searchParams: { category, endcursor, nextPage } }: Props) {
     const userId = '66000845db3f615e0e8c009c'
-    const result = await getUserProjects(userId, nextPage) as { user?: UserProfile }
-    const filteredProjects = result?.user?.projects
-        ?.filter((node) => node?._id.toString() !== null)
+    const {
+        projects,
+        totalProjects,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+    } = await getUserProjects(userId, nextPage) as FetcheProjects
+    // const filteredProjects = result?.user?.projects
+    //     ?.filter((node) => node?._id.toString() !== null)
 
     // filteredProjects?.sort((a, b) => {
     //     const dateA = new Date(a.node.updatedAt) as any;
@@ -118,7 +132,7 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                         a role where I can grow and learn from experienced team members and
                         enhance and grow my skills as Web Developer.
                         <div className="m-6"></div>
-                        <Link href={'https://www.canva.com/design/DAFGYxUftcI/-SnY4L2-u2rT9hovxIFPCQ/view?utm_content=DAFGYxUftcI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink'} target='_blank' className="flexCenter gap-3 px-4 py-3 text-white bg-black/50  bg-primary-purple rounded-xl text-sm font-medium max-md:w-full disabled:bg-purple-400">View My Resume</Link>
+                        <Link href={'https://www.canva.com/design/DAFGYxUftcI/xgtpVJz6a4mGvtc2JXdDxg/view?utm_content=DAFGYxUftcI&utm_campaign=designshare&utm_medium=link&utm_source=editor'} target='_blank' className="flexCenter gap-3 px-4 py-3 text-white bg-black/50  bg-primary-purple rounded-xl text-sm font-medium max-md:w-full disabled:bg-purple-400">View My Resume</Link>
                     </div>
                 </div>
 
@@ -173,8 +187,8 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                 <section className="min-h-[400px] py-16 min-w-full" id='projects'>
                     <div className="flex text-5xl font-extrabold text-black font-mono ">PROJECTS</div>
                     <section className="projects-grid">
-                        {filteredProjects?.map((node) => (
-                            <Link href={`/project/${node?._id}`} className="flexCenter group relative w-full h-full ">
+                        {projects?.map((node: ProjectInterface, index: number) => (
+                            <Link key={node?._id} href={`/project/${node?._id}`} className="flexCenter group relative w-full h-full ">
                                 <Image src={node?.image} width={414} height={314} className="w-full h-full object-cover rounded-2xl border border-black/50" alt="project image" />
 
                                 <div className="hidden group-hover:flex related_project-card_title">
@@ -183,12 +197,12 @@ export default async function page({ searchParams: { category, endcursor, nextPa
                             </Link>
                         ))}
                     </section>
-                    {/* <LoadMore
-                        startCursor={pageInfo.startCursor}
-                        endCursor={pageInfo.endCursor}
-                        hasNextPage={pageInfo.hasNextPage}
-                        hasPrevPage={pageInfo.hasPreviousPage}
-                    /> */}
+                    <LoadMore
+                        // startCursor={pageInfo.startCursor}
+                        // endCursor={pageInfo.endCursor}
+                        hasNextPage={hasNextPage}
+                        hasPrevPage={hasPreviousPage}
+                    />
                 </section>
 
             </section>

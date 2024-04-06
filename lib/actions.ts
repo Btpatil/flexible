@@ -322,17 +322,42 @@ export const getProjectForEditingDetails = async (id: string) => {
     // return makeGraphQlRequest(getProjectByIdQuery, { id });
 };
 
-export const getUserProjects = async (id: string, numberOfProects?: string) => {
+export const getUserProjects = async (id: string, p?: string) => {
     // new
+    const page = p ? parseInt(p) : 1
+    const perPage = 4
+    const skip = page ? (page - 1) * perPage : 0
+
     try {
         await getconnectionToMongoDB()
 
-        const user = await User
-            .findById(id)
-            .populate('projects')
+        const totalProjects = await ProjectModel.countDocuments()
+        const totalPages = Math.ceil(totalProjects / perPage)
+        
+        const projects = await ProjectModel
+            .find()
+            .where({
+                createdBy: id,
+            })
+            .sort({
+                updatedAt: 'desc',
+            })
+            .skip(skip)
+            .limit(perPage)
+            // .populate('createdBy')
+            // .lean()
             .exec()
 
-        return { user }
+        const hasNextPage = page ? page < totalPages : totalPages > 1 ? true : false
+        const hasPreviousPage = page ? page > 1 : false
+
+        return {
+            projects,
+            totalProjects,
+            totalPages,
+            hasNextPage,
+            hasPreviousPage
+        }
     } catch (error) {
         // throw new Error("Failed to fetch the Projects")
         console.log(error)
